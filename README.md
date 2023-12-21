@@ -2,14 +2,14 @@
 
 Deploy Application gateway ingress controller (AGIC) and expose a sample application. Use workload Identity for AGIC to avoid Static and long term credentials.
 
-Sample app is reachable at http://40.68.167.160/
+~~Sample app is reachable at http://40.68.167.160/~~ (not anymore, infra destroyed)
 
 > used one of my deployments was lazy to write some k8s manifests 🥲
 
 ## Considerations
 
 1. APP Gw Requires a dedicated subnet with no other resources.
-2. Helm Deployment over Add On for more customizations.
+2. AGIC Helm Deployment over Add On for more customizations. Checkout [Difference between Helm deployment and AKS Add-On](https://learn.microsoft.com/en-us/azure/application-gateway/ingress-controller-overview#difference-between-helm-deployment-and-aks-add-on)
 3. Workload Idenity over service principal
 4. Use `lifecycle.ignore_changes` to avoid conflict between terraform and AGIC on application gateway deployment with terraform.
 5. Refer to [agic_resource_permissions_map](./azure-kubernetes-service/local.tf) for minimum permissions needed by AGIC.
@@ -20,6 +20,6 @@ Sample app is reachable at http://40.68.167.160/
 2. Known Issues which may impact us:
    1. [SSL Certificates are not pruned by AGIC](https://github.com/Azure/application-gateway-kubernetes-ingress/issues/1488)
    2. [Community thoughs on AGIC](https://github.com/Azure/application-gateway-kubernetes-ingress/issues/725)
-   3. Soon Deprecation from Azure
+   3. Possibility of Soon Deprecation from Azure.
 
 3. Could be cost intesive but not a deal breaker for us as per discussions.
