@@ -19,7 +19,7 @@ Deploy Application gateway ingress controller (AGIC) and expose a sample applica
 1. AGIC does not support Azure CNI Overlay Mode, ref: [Limitations with Azure CNI](https://learn.microsoft.com/en-us/azure/aks/azure-cni-overlay?tabs=kubectl#limitations-with-azure-cni-overlay)
 2. Known Issues which may impact us:
    1. [SSL Certificates are not pruned by AGIC](https://github.com/Azure/application-gateway-kubernetes-ingress/issues/1488)
-   2. [Community thoughs on AGIC](https://github.com/Azure/application-gateway-kubernetes-ingress/issues/725)
+   2. [Community thoughts on AGIC](https://github.com/Azure/application-gateway-kubernetes-ingress/issues/725)
    3. Possibility of Soon Deprecation from Azure.
 
-3. Could be cost intesive but not a deal breaker for us as per discussions.
+3. Could be cost-intensive but not a deal breaker for us as per discussions.
