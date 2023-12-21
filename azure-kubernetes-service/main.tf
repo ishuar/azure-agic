@@ -28,18 +28,40 @@ module "ssh_key_generator" {
   file_permission      = "600"
 }
 
+## User Assigned Identity
+resource "azurerm_user_assigned_identity" "aks" {
+  name                = "${local.prefix}-aks-uid"
+  resource_group_name = data.azurerm_resource_group.this.name
+  location            = data.azurerm_resource_group.this.location
+}
+
 ## Azure Kubernetes Cluster
 module "aks" {
   source  = "ishuar/aks/azure"
   version = "~> 2.3"
 
-  location                     = data.azurerm_virtual_network.this.location
-  resource_group_name          = data.azurerm_virtual_network.this.resource_group_name
-  name                         = "${local.prefix}-cluster"
-  dns_prefix                   = local.prefix
-  default_node_pool_name       = "default"
-  default_node_pool_node_count = 1
-  key_data                     = trimspace(module.ssh_key_generator.public_ssh_key)
+  location            = data.azurerm_virtual_network.this.location
+  resource_group_name = data.azurerm_virtual_network.this.resource_group_name
+  name                = "${local.prefix}-cluster"
+  dns_prefix          = local.prefix
+  key_data            = trimspace(module.ssh_key_generator.public_ssh_key)
+
+  ## Api service access profile
+  # enable_api_server_access_profile    = true
+  # vnet_integration_enabled            = true
+  # api_server_access_profile_subnet_id = azurerm_subnet.this.id
+
+  ## Identity
+  identity_type = "UserAssigned"
+  identity_ids  = [azurerm_user_assigned_identity.aks.id]
+
+  ## Default node pool
+  default_node_pool_name                = "system"
+  default_node_pool_enable_auto_scaling = true
+  default_node_pool_vm_size             = "standard_d2ds_v4"
+  default_node_pool_min_count           = 1
+  default_node_pool_max_count           = 2
+  default_node_pool_max_pods            = 110
 
   ## Networking
   vnet_subnet_id      = azurerm_subnet.this.id
@@ -47,7 +69,7 @@ module "aks" {
   network_plugin_mode = null
   network_policy      = "azure"
 
-  # ## Application Gateway
+  # ## Application Gateway via add-on
   # ingress_app_gw_enabled = true
   # ingress_app_gw_id      = data.azurerm_application_gateway.this.id
   ingress_app_gw_enabled = false
@@ -78,14 +100,19 @@ module "aks" {
       recreating_enabled       = true
       depends_on               = ["sources"]
     },
+    {
+      name                     = "kubescape"
+      path                     = "./kubernetes-in-real-life/tree/main/azure-kubernetes-service/gitops/fluxcd/observability/kubescape"
+      sync_interval_in_seconds = 10
+      recreating_enabled       = true
+      depends_on               = ["sources"]
+    },
   ]
 
   ## Workload Identity
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
 
-
   ### This is experimental only Feature
   enable_fluxcd_az_providers = true
 }
-
